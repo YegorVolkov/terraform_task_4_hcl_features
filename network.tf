@@ -20,13 +20,15 @@ resource "azurerm_network_security_group" "main" {
   dynamic "security_rule" {
     for_each = local.security-rules
     content {
-      name                   = security_rule.value.name
-      priority               = security_rule.value.priority
-      direction              = security_rule.value.direction
-      access                 = security_rule.value.access
-      protocol               = security_rule.value.protocol
-      source_port_range      = security_rule.value.source_port_range
-      destination_port_range = security_rule.value.destination_port_range
+      name                       = security_rule.value.name
+      protocol                   = security_rule.value.protocol
+      source_port_range          = security_rule.value.source_port_range
+      destination_port_range     = security_rule.value.destination_port_range
+      source_address_prefix      = security_rule.value.source_address_prefix
+      destination_address_prefix = security_rule.value.destination_address_prefix
+      access                     = security_rule.value.access
+      priority                   = security_rule.value.priority
+      direction                  = security_rule.value.direction
     }
   }
 
@@ -38,13 +40,13 @@ resource "azurerm_network_security_group" "main" {
 # No need to insert ${count.index} in resource Local_Name - Terraform handles it itself
 resource "azurerm_network_interface" "main" {
   for_each            = toset(local.nic-names)
-  name                = "${var.prefix}-nic-${each.key}"
+  name                = each.key
   location            = azurerm_resource_group.example.location
   resource_group_name = azurerm_resource_group.example.name
 
   # different NIC's may have identical ip_configurations
   ip_configuration {
-    name                          = "testconfiguration"
+    name                          = "ip-config-${replace(each.key, "${var.prefix}-nic-", "")}"
     subnet_id                     = azurerm_subnet.internal.id
     private_ip_address_allocation = "Dynamic"
     # currently we have no goal to have access from outside

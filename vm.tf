@@ -9,11 +9,13 @@ resource "azurerm_linux_virtual_machine" "main" {
   admin_password                  = var.vm_pass
   disable_password_authentication = false
   # refers to relevantly indexed NIC
-  network_interface_ids = [azurerm_network_interface.main[count.index].id]
+  network_interface_ids = [
+    local.nic_id_map["${var.prefix}-nic-${count.index + 1}"]
+  ]
 
   # Premium SSD \ Local redundancy \ 64 Gb - to meet free subscription req's
   os_disk {
-    name                 = "myosdisk1"
+    name                 = "myosdisk${count.index + 1}"
     caching              = "ReadWrite"
     disk_size_gb         = "64"
     storage_account_type = "Premium_LRS"

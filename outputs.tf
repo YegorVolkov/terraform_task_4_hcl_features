@@ -20,5 +20,4 @@ output "vm-ids" {
     for vm in azurerm_linux_virtual_machine.main :
     vm.id
   ]
-
 }
